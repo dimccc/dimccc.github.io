@@ -259,7 +259,8 @@ function setInput(value, output, input) {
 
 function roundInput(value, input) {
 	if (input.step) {
-		value = Math.round(value / input.step) * input.step;
+		let factor = 1 / parseFloat(input.step);
+		value = Math.round(value * factor) / factor;
 	}
 	return value;
 }
