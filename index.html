@@ -74,7 +74,13 @@ details {
 	max-width:380px;
 }
 summary {
-	padding:10px;
+	outline:none;
+	margin:5px 0;
+	padding:5px 10px;
+}
+summary:focus-visible {
+	background:#999;
+	border-radius:10px;
 }
 #settings{
 	margin:0 10px;
@@ -89,7 +95,6 @@ summary {
 	margin:10px;
 	font:400 1rem/1.2 sans-serif;
 }
-
 td[colspan="2"] {
 	text-align:center;
 }
