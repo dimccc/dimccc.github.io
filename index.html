@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width">
+<title>CCDim</title>
+<meta name="viewport" content="width=device-width">
+<meta name="description" content="Formulaire de calcul pour le dimensionnement des câbles en très basse tension et en courant continu">
+<style>
+body {
+	background:#bbb;
+	font:400 100%/1.2 sans-serif;
+}
+input, select {
+	border-radius:3px;
+	background:#f5f5f5;
+	border:1px solid #aaa;
+	box-sizing:content-box;
+}
+input:focus, select:focus {
+	outline:none !important;
+	background:#fff !important;
+	border-color:#000 !important;
+}
+#data {
+	margin:auto;
+	max-width:380px;
+}
+#data table {
+	width:100%;
+	background:#fff;
+	padding:5px 10px;
+	border-radius:10px;
+	border:1px solid #999;
+	box-shadow:0 0 8px rgba(0,0,0,.2);
+}
+#data input, #data select {
+	padding:2px;
+	width:3.5em;
+	height:1.2em;
+	font:400 1.2rem sans-serif;
+}
+#data input {
+	text-indent:.2em;
+}
+#data input:read-only {
+	border:none;
+	background:#fff;
+	-moz-appearance:textfield;
+}
+#data input.highlight, #data select.highlight{
+	background:yellow;
+}
+caption {
+	margin:1vw 0;
+	font-size:1.3rem;
+	text-align:center;
+}
+th {
+	font-weight:400;
+	text-align:left;
+	padding-right:.5em;
+}
+td {
+	white-space: nowrap;
+}
+td span {
+	font-size:1.2rem;
+}
+#data tr {
+	height:2.5em;
+}
+details {
+	margin:auto;
+	max-width:380px;
+}
+summary {
+	padding:10px;
+}
+#settings{
+	margin:0 10px;
+}
+#settings input {
+	width:4em;
+	border-color:#777;
+	padding:2px 2px 1px;
+	font:400 1rem sans-serif;
+}
+#settings button {
+	margin:10px;
+	font:400 1rem/1.2 sans-serif;
+}
+
+td[colspan="2"] {
+	text-align:center;
+}
+</style>
+</head>
+<body>
+<form id="data" oninput="clearHighlights()">
+	<table>
+		<caption>Dimensionnement des câbles en très basse tension et en courant continu</caption>
+		<tr>
+				<th><label for="voltage">Tension d'alimentation</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage" aria-live="polite" type="number" min="5" step=".1" max="50" value="12"> Volts</td>
+		</tr>
+		<tr>
+				<th><label for="power">Puissance absorbée</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power" aria-live="polite" type="number" min="1" step="1" max="1500" value="180"> Watts</td>
+		</tr>
+		<tr>
+				<th><label for="current">Intensité consommée</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" aria-live="polite" type="number" min=".1" step=".1" max="125" value="15"> Ampères</td>
+		</tr>
+		<tr>
+				<th><label for="length">Longueur de fil&nbsp;aller&nbsp;retour</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="length" aria-live="polite" type="number" min=".1" step=".1" value="6"> Mètres</td>
+		</tr>
+		<tr>
+				<th><label for="section">Section de fil théorique</label></th>
+				<td><input id="section" type="number" aria-live="polite" readonly value="4" step=".01"> mm²</td>
+		</tr>
+		<tr>
+				<th><label for="standard_section">Section de fil standard</label></th>
+				<td>
+					<select onchange="compute(this)" id="standard_section" aria-live="polite">
+						<option value="0.25">0,25</option>
+						<option value="0.5">0,5</option>
+						<option value="0.75">0,75</option>
+						<option value="1">1</option>
+						<option value="1.5">1,5</option>
+						<option value="2">2</option>
+						<option value="2.5">2,5</option>
+						<option value="4" selected>4</option>
+						<option value="6">6</option>
+						<option value="10">10</option>
+						<option value="16">16</option>
+						<option value="25">25</option>
+						<option value="35">35</option>
+						<option value="50">50</option>
+						<option value="51" disabled>> 50</option>
+					</select> mm²
+				</td>
+		</tr>
+		<tr>
+				<th><label for="voltage_drop_abs">Chute de tension</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_abs" aria-live="polite" type="number" min=".01" step=".01" max="0.6" value="0.52"> Volts</td>
+		</tr>
+		<tr>
+				<th><label for="voltage_drop_per">Chute de tension</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" aria-live="polite" type="number" min=".1" step=".1" max="5" value="4.3"> %</td>
+		</tr>
+		<tr>
+				<th><label for="power_lost">Puissance perdue</label></th>
+				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power_lost" aria-live="polite" type="number" min="0.1" step=".1" max="9" value="8"> Watts</td>
+		</tr>
+	</table>
+</form>
+<details>
+	<summary>Paramètres</summary>
+	<form id="settings" onsubmit="saveSettings(event)">
+		<table>
+			<tr>
+				<th><label for="resistivity">Résistivité du conducteur</label></th>
+				<td><input onchange="" id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
+			</tr>
+			<tr>
+				<th><label for="max_drop_per">Chute de tension maximale</label></th>
+				<td><input onchange="" id="max_drop_per" type="number" min=".1" step=".1" value="5"> %</td>
+			</tr>
+			<tr>
+				<td colspan="2"><button>Sauvegarder</button><button type="reset">Rétablir</button></td>
+			</tr>
+		</table>
+	</form>
+</details>
+<script>
+function setMaxDrop(input) {
+	data.voltage_drop_abs.max = roundInput(voltage * max_drop_per, data.voltage_drop_abs);
+	data.power_lost.max = roundInput(power * max_drop_per, data.power_lost);
+}
+
+function setCurrent(input) {
+	current = power / voltage;
+	setInput(current, data.current, input);
+}
+
+function setPower(input){ 
+	power = current * voltage;
+	setInput(power, data.power, input);
+}
+
+function setLength(input) { 
+	length = section * voltage_drop_abs / (current * resistivity);
+	setInput(length, data.length, input);
+}
+
+function setSection(input) {
+	if (input == 'standard_section') {
+		section = standard_section;
+	}
+	else {
+		section = (length * current * resistivity) / voltage_drop_abs;
+		for (standard_section of sections) {
+			if (section <= standard_section) break;
+		}
+		setInput(standard_section, data.standard_section, input);
+	}
+	setInput(section, data.section, input);
+}
+
+function setVoltageDropAbs(input) {
+	if (input == 'voltage_drop_per') {
+		voltage_drop_abs = voltage_drop_per * voltage / 100;
+	}
+	else if (input == 'power_lost') {
+		voltage_drop_abs = power_lost / current;
+	}
+	else {
+		voltage_drop_abs = (length * current * resistivity) / section;
+	}
+	setInput(voltage_drop_abs, data.voltage_drop_abs, input);
+}
+
+function setVoltageDropPer(input) {
+	voltage_drop_per = voltage_drop_abs / voltage * 100;;
+	setInput(voltage_drop_per, data.voltage_drop_per, input);
+}
+
+function setLostPower(input) {
+	power_lost = voltage_drop_abs * current;
+	setInput(power_lost, data.power_lost, input);
+}
+
+function setInput(value, output, input) {
+	value = roundInput(value, output);
+	if (value < output.min) {
+		value = output.min;
+	}
+	if (output.max && value > output.max) {
+		value = output.max;
+		window[output.id] = value;
+		if (input == 'standard_section') {
+			setLength(input);
+		}
+		else {
+			setSection(input);
+		}
+	}
+	if (output.value != value) {
+		output.value = value;
+		highlight_values.push(output);
+	}
+}
+
+function roundInput(value, input) {
+	if (input.step) {
+		value = Math.round(value / input.step) * input.step;
+	}
+	return value;
+}
+
+function clearHighlights() {
+	if (highlight_values) {
+		highlight_values.forEach(function(input) {
+			input.classList.remove('highlight');
+		});
+		highlight_values = [];
+	}
+}
+
+function compute(input) {
+	clearHighlights();
+	if (!input.checkValidity()) {
+		let value = parseFloat(input.value);
+		if (isNaN(value)) {
+			input.value = roundInput(window[input.id], input);
+			return
+		}
+		else if (value < input.min) {
+			input.value = input.min;
+		}
+		else if (input.max && value > input.max) {
+			input.value = input.max;
+		}
+	}
+	window[input.id] = input.value
+	set_values[input.id].forEach(function(setValue) {
+		setValue(input.id);
+	});
+	highlight_values.forEach(function(input) {
+		input.classList.add('highlight');
+	});
+}
+
+function saveSettings(e) {
+	e.preventDefault();
+	let form = e.target;
+	resistivity = form.resistivity.value;
+	max_drop_per = form.max_drop_per.value / 100;
+	data.voltage_drop_per.max = form.max_drop_per.value;
+	compute(data.voltage);
+	form.parentNode.removeAttribute('open');
+}
+
+const
+data = document.getElementById('data'),
+set_values = {
+	voltage:          [setCurrent, setMaxDrop, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	power:            [setCurrent, setMaxDrop, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	current:          [setPower, setMaxDrop, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	length:           [setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	standard_section: [setSection, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	voltage_drop_abs: [setVoltageDropPer, setLostPower, setSection],
+	voltage_drop_per: [setVoltageDropAbs, setLostPower, setSection],
+	power_lost:       [setVoltageDropAbs, setVoltageDropPer, setSection]
+},
+sections = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 51];
+
+var
+max_drop_per = .05,
+resistivity = 0.023,
+highlight_values = [],
+voltage          = data.voltage.value,
+power            = data.power.value, 
+current          = data.current.value, 
+length           = data.length.value, 
+section          = data.section.value,
+standard_section = data.standard_section.value,
+voltage_drop_per = data.voltage_drop_per.value,
+voltage_drop_abs = data.voltage_drop_abs.value,
+power_lost       = data.power_lost.value;
+</script>
+</body>
+</html>
