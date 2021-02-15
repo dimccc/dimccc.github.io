@@ -97,32 +97,32 @@ td[colspan="2"] {
 </head>
 <body>
 <form id="data" oninput="clearHighlights()" onreset=clearHighlights()>
-	<table>
+	<table aria-live="polite">
 		<caption>Dimensionnement des câbles en très basse tension et en courant continu</caption>
-		<tr>
-				<th><label for="voltage">Tension d'alimentation</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage" aria-live="polite" type="number" min="5" step=".1" max="50" value="12"> Volts</td>
+		<tr aria-atomic="true">
+			<th><label for="voltage">Tension d'alimentation</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage" type="number" min="5" step=".1" max="50" value="12"> Volts</td>
 		</tr>
-		<tr>
-				<th><label for="power">Puissance absorbée</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power" aria-live="polite" type="number" min="1" step="1" max="1500" value="180"> Watts</td>
+		<tr aria-atomic="true">
+			<th><label for="power">Puissance absorbée</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power" type="number" min="1" step="1" max="1500" value="180"> Watts</td>
 		</tr>
-		<tr>
-				<th><label for="current">Intensité consommée</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" aria-live="polite" type="number" min=".1" step=".1" max="125" value="15"> Ampères</td>
+		<tr aria-atomic="true">
+			<th><label for="current">Intensité consommée</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" type="number" min=".1" step=".1" max="125" value="15"> Ampères</td>
 		</tr>
-		<tr>
-				<th><label for="length">Longueur de fil&nbsp;aller&nbsp;retour</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="length" aria-live="polite" type="number" min=".1" step=".1" value="6"> Mètres</td>
+		<tr aria-atomic="true">
+			<th><label for="length">Longueur de fil&nbsp;aller&nbsp;retour</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="length" type="number" min=".1" step=".1" value="6"> Mètres</td>
 		</tr>
-		<tr>
-				<th><label for="section">Section de fil théorique</label></th>
-				<td><input id="section" type="number" aria-live="polite" readonly value="4" step=".01"> mm²</td>
+		<tr aria-atomic="true">
+			<th><label for="section">Section de fil théorique</label></th>
+			<td><input id="section" type="number" readonly value="4" step=".01"> mm²</td>
 		</tr>
-		<tr>
+		<tr aria-atomic="true">
 				<th><label for="standard_section">Section de fil standard</label></th>
 				<td>
-					<select onchange="compute(this)" id="standard_section" aria-live="polite">
+					<select onchange="compute(this)" id="standard_section">
 						<option value="0.25">0,25</option>
 						<option value="0.5">0,5</option>
 						<option value="0.75">0,75</option>
@@ -141,17 +141,17 @@ td[colspan="2"] {
 					</select> mm²
 				</td>
 		</tr>
-		<tr>
-				<th><label for="voltage_drop_abs">Chute de tension</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_abs" aria-live="polite" type="number" min=".01" step=".01" max="0.6" value="0.52"> Volts</td>
+		<tr aria-atomic="true">
+			<th><label for="voltage_drop_abs">Chute de tension</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_abs" type="number" min=".01" step=".01" max="0.6" value="0.52"> Volts</td>
 		</tr>
-		<tr>
-				<th><label for="voltage_drop_per">Chute de tension</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" aria-live="polite" type="number" min=".1" step=".1" max="5" value="4.3"> %</td>
+		<tr aria-atomic="true">
+			<th><label for="voltage_drop_per">Chute de tension</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" type="number" min=".1" step=".1" max="5" value="4.3"> %</td>
 		</tr>
-		<tr>
-				<th><label for="power_lost">Puissance perdue</label></th>
-				<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power_lost" aria-live="polite" type="number" min="0.1" step=".1" max="9" value="7.8"> Watts</td>
+		<tr aria-atomic="true">
+			<th><label for="power_lost">Puissance perdue</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power_lost" type="number" min="0.1" step=".1" max="9" value="7.8"> Watts</td>
 		</tr>
 	</table>
 </form>
