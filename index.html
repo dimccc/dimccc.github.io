@@ -5,6 +5,7 @@
 <title>DimCCC</title>
 <meta name="viewport" content="width=device-width">
 <meta name="description" content="Formulaire de calcul pour le dimensionnement des câbles en très basse tension et en courant continu">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='12 2 120 120'><text y='100' font-size='100'>🔢</text></svg>">
 <style>
 html {
 	overflow-y:scroll;
@@ -82,6 +83,10 @@ summary {
 	outline:none;
 	margin:5px 0;
 	padding:5px 10px;
+}
+details[open] summary:after {
+	float:right;
+	content:'⨉';
 }
 summary:focus-visible {
 	background:#999;
