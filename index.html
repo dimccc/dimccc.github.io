@@ -10,6 +10,8 @@ html {
 	overflow-y:scroll;
 }
 body {
+	margin:0 8px;
+	height:100vh;
 	background:#bbb;
 	font:400 100%/1.2 sans-serif;
 }
@@ -54,9 +56,9 @@ input:focus, select:focus {
 	background:yellow;
 }
 caption {
-	margin:1vw 0;
 	font-size:1.3rem;
 	text-align:center;
+	margin:1.5vw 0 1vw;
 }
 th {
 	font-weight:400;
@@ -86,7 +88,7 @@ summary:focus-visible {
 	border-radius:10px;
 }
 #settings{
-	margin:0 10px;
+	margin:0 10px 50px;
 }
 #settings input {
 	width:4em;
@@ -180,7 +182,7 @@ td[colspan="2"] {
 				<td><input id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
 			</tr>
 			<tr>
-				<td colspan="2"><button>Sauvegarder</button><button type="reset">Réinitialiser</button></td>
+				<td colspan="2"><button id="save_settings">Sauvegarder</button><button type="reset">Réinitialiser</button></td>
 			</tr>
 		</table>
 	</form>
@@ -317,7 +319,9 @@ function compute(input) {
 function scrollToSettings() {
 	if (!settings.parentNode.hasAttribute('open')) {
 		setTimeout(function() {
-			settings.scrollIntoView({behavior: 'smooth', block: 'end'});
+			//window.scrollBy({top: 1000, left: 0, behavior: 'smooth'});
+						settings.scrollIntoView({behavior: 'smooth', block: 'end'});
+
 		}, 1);
 	}
 }
@@ -355,6 +359,10 @@ data.querySelectorAll('input, select').forEach(function(input) {
 settings.querySelectorAll('input').forEach(function(input) {
 	window[input.id] = settings[input.id].value;
 });
+
+window.onLoad = function() {        
+	window.scrollTo(0,1000);
+}
 </script>
 </body>
 </html>
