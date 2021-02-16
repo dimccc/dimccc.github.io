@@ -111,7 +111,7 @@ td[colspan="2"] {
 </style>
 </head>
 <body onload="settings.reset()">
-<form id="data" onreset=clearHighlights()>
+<form id="data" onreset=clearHighlights() autocomplete="off">
 	<table aria-live="polite">
 		<caption>Dimensionnement des câbles en très basse tension et en courant continu</caption>
 		<tr aria-atomic="true">
@@ -172,7 +172,7 @@ td[colspan="2"] {
 </form>
 <details>
 	<summary onclick="scrollToSettings()">Paramètres</summary>
-	<form id="settings" onsubmit="saveSettings(event)" onreset="data.reset()">
+	<form id="settings" onsubmit="saveSettings(event)" onreset="data.reset()" autocomplete="off">
 		<table>
 			<tr>
 				<th><label for="resistivity">Résistivité du conducteur</label></th>
