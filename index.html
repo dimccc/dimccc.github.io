@@ -110,11 +110,11 @@ td[colspan="2"] {
 		</tr>
 		<tr aria-atomic="true">
 			<th><label for="power">Puissance absorbée</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power" type="number" min="1" step="1" max="1500" value="180"> Watts</td>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power" type="number" min="1" step="1" max="3600" value="180"> Watts</td>
 		</tr>
 		<tr aria-atomic="true">
 			<th><label for="current">Intensité consommée</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" type="number" min=".1" step=".1" max="125" value="15"> Ampères</td>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" type="number" min=".1" step=".1" max="150" value="15"> Ampères</td>
 		</tr>
 		<tr aria-atomic="true">
 			<th><label for="length">Longueur de fil&nbsp;aller&nbsp;retour</label></th>
@@ -173,13 +173,18 @@ td[colspan="2"] {
 				<td><input onchange="" id="max_drop_per" type="number" min=".1" step=".1" value="5"> %</td>
 			</tr>
 			<tr>
+				<th><label for="max_current">Intensité maximale</label></th>
+				<td><input onchange="" id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
+			</tr>
+			<tr>
 				<td colspan="2"><button>Sauvegarder</button><button type="reset">Réinitialiser</button></td>
 			</tr>
 		</table>
 	</form>
 </details>
 <script>
-function setMaxDrop(input) {
+function setMaxValues(input) {
+	data.power.max = roundInput(voltage * max_current, data.power_lost);
 	data.voltage_drop_abs.max = roundInput(voltage * max_drop_per, data.voltage_drop_abs);
 	data.power_lost.max = roundInput(power * max_drop_per, data.power_lost);
 }
@@ -247,6 +252,9 @@ function setInput(value, output, input) {
 		if (input == 'standard_section') {
 			setLength(input);
 		}
+		else if (input == 'voltage') {
+			setPower(input);
+		}
 		else {
 			setSection(input);
 		}
@@ -302,6 +310,8 @@ function saveSettings(e) {
 	e.preventDefault();
 	let form = e.target;
 	resistivity = form.resistivity.value;
+	max_current = form.max_current.value;
+	data.current.max = form.max_current.value;
 	max_drop_per = form.max_drop_per.value / 100;
 	data.voltage_drop_per.max = form.max_drop_per.value;
 	compute(data.voltage);
@@ -311,9 +321,9 @@ function saveSettings(e) {
 const
 data = document.getElementById('data'),
 set_values = {
-	voltage:          [setCurrent, setMaxDrop, setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	power:            [setCurrent, setMaxDrop, setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	current:          [setPower, setMaxDrop, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	voltage:          [setCurrent, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	power:            [setCurrent, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
+	current:          [setPower, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
 	length:           [setVoltageDropAbs, setVoltageDropPer, setLostPower],
 	standard_section: [setSection, setVoltageDropAbs, setVoltageDropPer, setLostPower],
 	voltage_drop_abs: [setVoltageDropPer, setLostPower, setSection],
@@ -323,6 +333,7 @@ set_values = {
 sections = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 51];
 
 var
+max_current = 150,
 max_drop_per = .05,
 resistivity = 0.023,
 highlight_values = [],
