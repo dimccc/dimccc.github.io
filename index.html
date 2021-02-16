@@ -169,15 +169,15 @@ td[colspan="2"] {
 		<table>
 			<tr>
 				<th><label for="resistivity">Résistivité du conducteur</label></th>
-				<td><input onchange="" id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
+				<td><input id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
 			</tr>
 			<tr>
 				<th><label for="max_drop_per">Chute de tension maximale</label></th>
-				<td><input onchange="" id="max_drop_per" type="number" min=".1" step=".1" value="5"> %</td>
+				<td><input id="max_drop_per" type="number" min=".1" step=".1" value="5"> %</td>
 			</tr>
 			<tr>
 				<th><label for="max_current">Intensité maximale</label></th>
-				<td><input onchange="" id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
+				<td><input id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
 			</tr>
 			<tr>
 				<td colspan="2"><button>Sauvegarder</button><button type="reset">Réinitialiser</button></td>
@@ -194,26 +194,26 @@ function setMaxValues(input) {
 
 function setCurrent(input) {
 	current = power / voltage;
-	setInput(current, data.current, input);
+	setOutput(current, data.current, input);
 }
 
 function setPower(input){ 
 	power = current * voltage;
-	setInput(power, data.power, input);
+	setOutput(power, data.power, input);
 }
 
 function setLength(input) { 
 	length = section * voltage_drop_abs / (current * resistivity);
-	setInput(length, data.length, input);
+	setOutput(length, data.length, input);
 }
 
 function setSection(input) {
-	if (input == 'standard_section') {
+	if (input.id == 'standard_section') {
 		section = standard_section;
 	}
 	else {
 		section = (length * current * resistivity) / voltage_drop_abs;
-		if (section > 50 && input != 'length') {
+		if (section > 50 && input.id != 'length') {
 			section = 50;
 			standard_section = 50;
 			setLength(input);
@@ -223,35 +223,35 @@ function setSection(input) {
 				if (section <= standard_section) break;
 			}
 		}
-		setInput(standard_section, data.standard_section, input);
+		setOutput(standard_section, data.standard_section, input);
 	}
-	setInput(section, data.section, input);
+	setOutput(section, data.section, input);
 }
 
 function setVoltageDropAbs(input) {
-	if (input == 'voltage_drop_per') {
+	if (input.id == 'voltage_drop_per') {
 		voltage_drop_abs = voltage_drop_per * voltage / 100;
 	}
-	else if (input == 'power_lost') {
+	else if (input.id == 'power_lost') {
 		voltage_drop_abs = power_lost / current;
 	}
 	else {
 		voltage_drop_abs = (length * current * resistivity) / section;
 	}
-	setInput(voltage_drop_abs, data.voltage_drop_abs, input);
+	setOutput(voltage_drop_abs, data.voltage_drop_abs, input);
 }
 
 function setVoltageDropPer(input) {
 	voltage_drop_per = voltage_drop_abs / voltage * 100;;
-	setInput(voltage_drop_per, data.voltage_drop_per, input);
+	setOutput(voltage_drop_per, data.voltage_drop_per, input);
 }
 
 function setLostPower(input) {
 	power_lost = voltage_drop_abs * current;
-	setInput(power_lost, data.power_lost, input);
+	setOutput(power_lost, data.power_lost, input);
 }
 
-function setInput(value, output, input) {
+function setOutput(value, output, input) {
 	value = roundInput(value, output);
 	if (value < output.min) {
 		value = output.min;
@@ -259,10 +259,10 @@ function setInput(value, output, input) {
 	if (output.max && value > output.max) {
 		value = output.max;
 		window[output.id] = value;
-		if (input == 'standard_section') {
+		if (input.id == 'standard_section') {
 			setLength(input);
 		}
-		else if (input == 'voltage') {
+		else if (input.id == 'voltage') {
 			setPower(input);
 		}
 		else {
@@ -271,8 +271,9 @@ function setInput(value, output, input) {
 	}
 	if (output.value != value) {
 		output.value = value;
-		if (input != 'standard_section' || output.id != 'section') {
-			highlight_values.push(output);
+		if (input.id != 'standard_section' || output.id != 'section') {
+			output.classList.add('highlight');
+			
 		}
 	}
 }
@@ -286,16 +287,14 @@ function roundInput(value, input) {
 }
 
 function clearHighlights() {
-	if (highlight_values) {
-		highlight_values.forEach(function(input) {
-			input.classList.remove('highlight');
-		});
-		highlight_values = [];
-	}
+	data.oninput = '';
+	data.querySelectorAll('.highlight').forEach(function(input) {
+		input.classList.remove('highlight');
+	});
 }
 
 function compute(input) {
-	clearHighlights();
+	data.oninput = clearHighlights;
 	if (!input.checkValidity()) {
 		let value = parseFloat(input.value);
 		if (isNaN(value)) {
@@ -309,30 +308,28 @@ function compute(input) {
 			input.value = input.max;
 		}
 	}
-	window[input.id] = input.value
-	set_values[input.id].forEach(function(setValue) {
-		setValue(input.id);
-	});
-	highlight_values.forEach(function(input) {
-		input.classList.add('highlight');
+	window[input.id] = input.value;
+	compute_list[input.id].forEach(function(setValue) {
+		setValue(input);
 	});
 }
 
 function saveSettings(e) {
 	e.preventDefault();
-	let form = e.target;
-	resistivity = form.resistivity.value;
-	max_current = form.max_current.value;
-	data.current.max = form.max_current.value;
-	max_drop_per = form.max_drop_per.value / 100;
-	data.voltage_drop_per.max = form.max_drop_per.value;
+	resistivity = settings.resistivity.value;
+	max_current = settings.max_current.value;
+	data.current.max = settings.max_current.value;
+	max_drop_per = settings.max_drop_per.value / 100;
+	data.voltage_drop_per.max = settings.max_drop_per.value;
 	compute(data.voltage);
-	form.parentNode.removeAttribute('open');
+	settings.parentNode.removeAttribute('open');
 }
 
 const
-data = document.getElementById('data'),
-set_values = {
+data         = document.getElementById('data'),
+settings     = document.getElementById('settings'),
+sections     = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 50.01],
+compute_list = {
 	voltage:          [setCurrent, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
 	power:            [setCurrent, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
 	current:          [setPower, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
@@ -341,23 +338,16 @@ set_values = {
 	voltage_drop_abs: [setVoltageDropPer, setLostPower, setSection],
 	voltage_drop_per: [setVoltageDropAbs, setLostPower, setSection],
 	power_lost:       [setVoltageDropAbs, setVoltageDropPer, setSection]
-},
-sections = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 50.01];
+};
 
-var
-max_current = 150,
-max_drop_per = .05,
-resistivity = 0.023,
-highlight_values = [],
-voltage          = data.voltage.value,
-power            = data.power.value, 
-current          = data.current.value, 
-length           = data.length.value, 
-section          = data.section.value,
-standard_section = data.standard_section.value,
-voltage_drop_per = data.voltage_drop_per.value,
-voltage_drop_abs = data.voltage_drop_abs.value,
-power_lost       = data.power_lost.value;
+data.querySelectorAll('input, select').forEach(function(input) {
+	window[input.id] = data[input.id].value;
+});
+
+settings.querySelectorAll('input').forEach(function(input) {
+	window[input.id] = settings[input.id].value;
+});
+
 </script>
 </body>
 </html>
