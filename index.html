@@ -164,7 +164,7 @@ td[colspan="2"] {
 	</table>
 </form>
 <details>
-	<summary>Paramètres</summary>
+	<summary onclick="scrollToSettings()">Paramètres</summary>
 	<form id="settings" onsubmit="saveSettings(event)" onreset="data.reset()">
 		<table>
 			<tr>
@@ -314,6 +314,14 @@ function compute(input) {
 	});
 }
 
+function scrollToSettings() {
+	if (!settings.parentNode.hasAttribute('open')) {
+		setTimeout(function() {
+			settings.scrollIntoView({behavior: 'smooth', block: 'end'});
+		}, 1);
+	}
+}
+
 function saveSettings(e) {
 	e.preventDefault();
 	resistivity = settings.resistivity.value;
@@ -347,7 +355,6 @@ data.querySelectorAll('input, select').forEach(function(input) {
 settings.querySelectorAll('input').forEach(function(input) {
 	window[input.id] = settings[input.id].value;
 });
-
 </script>
 </body>
 </html>
