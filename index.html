@@ -319,9 +319,7 @@ function compute(input) {
 function scrollToSettings() {
 	if (!settings.parentNode.hasAttribute('open')) {
 		setTimeout(function() {
-			//window.scrollBy({top: 1000, left: 0, behavior: 'smooth'});
-						settings.scrollIntoView({behavior: 'smooth', block: 'end'});
-
+			settings.scrollIntoView({behavior: 'smooth', block: 'end'});
 		}, 1);
 	}
 }
@@ -359,10 +357,6 @@ data.querySelectorAll('input, select').forEach(function(input) {
 settings.querySelectorAll('input').forEach(function(input) {
 	window[input.id] = settings[input.id].value;
 });
-
-window.onLoad = function() {        
-	window.scrollTo(0,1000);
-}
 </script>
 </body>
 </html>
