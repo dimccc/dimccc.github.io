@@ -109,7 +109,7 @@ td[colspan="2"] {
 		<caption>Dimensionnement des câbles en très basse tension et en courant continu</caption>
 		<tr aria-atomic="true">
 			<th><label for="voltage">Tension d'alimentation</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage" type="number" min="5" step=".1" max="50" value="12"> Volts</td>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage" type="number" min="3" step=".1" max="120" value="12"> Volts</td>
 		</tr>
 		<tr aria-atomic="true">
 			<th><label for="power">Puissance absorbée</label></th>
@@ -145,7 +145,7 @@ td[colspan="2"] {
 						<option value="25">25</option>
 						<option value="35">35</option>
 						<option value="50">50</option>
-						<option value="51" disabled>> 50</option>
+						<option value="50.01" disabled>> 50</option>
 					</select> mm²
 				</td>
 		</tr>
@@ -213,8 +213,15 @@ function setSection(input) {
 	}
 	else {
 		section = (length * current * resistivity) / voltage_drop_abs;
-		for (standard_section of sections) {
-			if (section <= standard_section) break;
+		if (section > 50 && input != 'length') {
+			section = 50;
+			standard_section = 50;
+			setLength(input);
+		}
+		else {
+			for (standard_section of sections) {
+				if (section <= standard_section) break;
+			}
 		}
 		setInput(standard_section, data.standard_section, input);
 	}
@@ -264,7 +271,9 @@ function setInput(value, output, input) {
 	}
 	if (output.value != value) {
 		output.value = value;
-		highlight_values.push(output);
+		if (input != 'standard_section' || output.id != 'section') {
+			highlight_values.push(output);
+		}
 	}
 }
 
@@ -333,7 +342,7 @@ set_values = {
 	voltage_drop_per: [setVoltageDropAbs, setLostPower, setSection],
 	power_lost:       [setVoltageDropAbs, setVoltageDropPer, setSection]
 },
-sections = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 51];
+sections = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 50.01];
 
 var
 max_current = 150,
