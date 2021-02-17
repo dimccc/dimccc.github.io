@@ -29,7 +29,7 @@ input:focus, select:focus {
 }
 #data {
 	margin:auto;
-	max-width:380px;
+	max-width:400px;
 }
 #data table {
 	width:100%;
@@ -77,11 +77,11 @@ td span {
 	font-size:1.2rem;
 }
 #data tr {
-	height:2.5em;
+	height:3em;
 }
 details {
 	margin:auto;
-	max-width:380px;
+	max-width:400px;
 }
 summary {
 	outline:none;
@@ -131,7 +131,7 @@ td[colspan="2"] {
 			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" type="number" min=".1" step=".1" max="150" value="15"> Ampères</td>
 		</tr>
 		<tr aria-atomic="true">
-			<th><label for="voltage_drop_per">Chute de tension max</label></th>
+			<th><label for="voltage_drop_per">Chute de tension maximale</label></th>
 			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" type="number" min=".1" step=".1" max="10" value="5"> %</td>
 		</tr>
 		<tr aria-atomic="true">
