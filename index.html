@@ -48,13 +48,17 @@ input:focus, select:focus {
 #data input {
 	text-indent:.2em;
 }
-#data input:read-only {
+#data input:disabled {
+	color:#000;
 	border:none;
 	background:#fff;
 	-moz-appearance:textfield;
 }
 #data input.highlight, #data select.highlight{
 	background:yellow;
+}
+#data select.exceeded{
+	background:red;
 }
 caption {
 	font-size:1.3rem;
@@ -127,46 +131,42 @@ td[colspan="2"] {
 			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" type="number" min=".1" step=".1" max="150" value="15"> Ampères</td>
 		</tr>
 		<tr aria-atomic="true">
+			<th><label for="voltage_drop_per">Chute de tension max</label></th>
+			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" type="number" min=".1" step=".1" max="10" value="5"> %</td>
+		</tr>
+		<tr aria-atomic="true">
 			<th><label for="length">Longueur de fil&nbsp;aller&nbsp;retour</label></th>
 			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="length" type="number" min=".1" step=".1" value="6"> Mètres</td>
 		</tr>
 		<tr aria-atomic="true">
-			<th><label for="section">Section de fil théorique</label></th>
-			<td><input id="section" type="number" readonly value="4" step=".01"> mm²</td>
+			<th><label for="section">Section de fil</label></th>
+			<td>
+				<select onchange="compute(this)" id="section">
+					<option value="0.25">0,25</option>
+					<option value="0.5">0,5</option>
+					<option value="0.75">0,75</option>
+					<option value="1">1</option>
+					<option value="1.5">1,5</option>
+					<option value="2">2</option>
+					<option value="2.5">2,5</option>
+					<option value="4" selected>4</option>
+					<option value="6">6</option>
+					<option value="10">10</option>
+					<option value="16">16</option>
+					<option value="25">25</option>
+					<option value="35">35</option>
+					<option value="50">50</option>
+					<option value="50.01" disabled>> 50</option>
+				</select> mm²
+			</td>
 		</tr>
 		<tr aria-atomic="true">
-				<th><label for="standard_section">Section de fil standard</label></th>
-				<td>
-					<select onchange="compute(this)" id="standard_section">
-						<option value="0.25">0,25</option>
-						<option value="0.5">0,5</option>
-						<option value="0.75">0,75</option>
-						<option value="1">1</option>
-						<option value="1.5">1,5</option>
-						<option value="2">2</option>
-						<option value="2.5">2,5</option>
-						<option value="4" selected>4</option>
-						<option value="6">6</option>
-						<option value="10">10</option>
-						<option value="16">16</option>
-						<option value="25">25</option>
-						<option value="35">35</option>
-						<option value="50">50</option>
-						<option value="50.01" disabled>> 50</option>
-					</select> mm²
-				</td>
+			<th>Chute de tension réelle</th>
+			<td><input id="voltage_drop_abs" role="presentation" disabled type="number" step=".01" value="0.52"> Volts</td>
 		</tr>
 		<tr aria-atomic="true">
-			<th><label for="voltage_drop_abs">Chute de tension</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_abs" type="number" min=".01" step=".01" max="0.6" value="0.52"> Volts</td>
-		</tr>
-		<tr aria-atomic="true">
-			<th><label for="voltage_drop_per">Chute de tension</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" type="number" min=".1" step=".1" max="5" value="4.3"> %</td>
-		</tr>
-		<tr aria-atomic="true">
-			<th><label for="power_lost">Puissance perdue</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="power_lost" type="number" min="0.1" step=".1" max="9" value="7.8"> Watts</td>
+			<th>Puissance perdue</th>
+			<td><input id="power_lost" role="presentation" disabled type="number" step=".1" value="7.8"> Watts</td>
 		</tr>
 	</table>
 </form>
@@ -179,10 +179,6 @@ td[colspan="2"] {
 				<td><input id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
 			</tr>
 			<tr>
-				<th><label for="max_drop_per">Chute de tension maximale</label></th>
-				<td><input id="max_drop_per" type="number" min=".1" step=".1" value="5"> %</td>
-			</tr>
-			<tr>
 				<th><label for="max_current">Intensité maximale</label></th>
 				<td><input id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
 			</tr>
@@ -193,95 +189,65 @@ td[colspan="2"] {
 	</form>
 </details>
 <script>
-function setMaxValues(input) {
-	data.power.max = roundInput(voltage * max_current, data.power_lost);
-	data.voltage_drop_abs.max = roundInput(voltage * max_drop_per, data.voltage_drop_abs);
-	data.power_lost.max = roundInput(power * max_drop_per, data.power_lost);
-}
-
 function setCurrent(input) {
 	current = power / voltage;
-	setOutput(current, data.current, input);
+	data.power.max = roundInput(voltage * max_current, data.power);
+	setOutput(current, data.current);
 }
 
 function setPower(input){ 
 	power = current * voltage;
-	setOutput(power, data.power, input);
+	data.power.max = roundInput(voltage * max_current, data.power);
+	setOutput(power, data.power);
 }
 
 function setLength(input) { 
-	length = section * voltage_drop_abs / (current * resistivity);
-	setOutput(length, data.length, input);
+	length = section * (voltage * voltage_drop_per / 100) / (current * resistivity);
+	setOutput(length, data.length);
 }
 
 function setSection(input) {
-	if (input.id == 'standard_section') {
-		section = standard_section;
-	}
-	else {
-		section = (length * current * resistivity) / voltage_drop_abs;
-		if (section > 50 && input.id != 'length') {
+	let theoretical_section = (length * current * resistivity) / (voltage * voltage_drop_per / 100);
+	if (theoretical_section > 50) {
+		if (input.id != 'length') {
 			section = 50;
-			standard_section = 50;
 			setLength(input);
+			data.section.classList.remove('exceeded');
+			setOutput(section, data.section);
 		}
 		else {
-			for (standard_section of sections) {
-				if (section <= standard_section) break;
-			}
+			data.section.classList.add('exceeded');
+			setOutput(50.01, data.section);
 		}
-		setOutput(standard_section, data.standard_section, input);
-	}
-	setOutput(section, data.section, input);
-}
-
-function setVoltageDropAbs(input) {
-	if (input.id == 'voltage_drop_per') {
-		voltage_drop_abs = voltage_drop_per * voltage / 100;
-	}
-	else if (input.id == 'power_lost') {
-		voltage_drop_abs = power_lost / current;
 	}
 	else {
-		voltage_drop_abs = (length * current * resistivity) / section;
+		for (section of sections) {
+			if (theoretical_section <= section) break;
+		}
+		data.section.classList.remove('exceeded');
+		setOutput(section, data.section);
 	}
-	setOutput(voltage_drop_abs, data.voltage_drop_abs, input);
 }
 
-function setVoltageDropPer(input) {
-	voltage_drop_per = voltage_drop_abs / voltage * 100;;
-	setOutput(voltage_drop_per, data.voltage_drop_per, input);
-}
-
-function setLostPower(input) {
+function setRealDrops(input) {
+	voltage_drop_abs = (length * current * resistivity) / section;
 	power_lost = voltage_drop_abs * current;
-	setOutput(power_lost, data.power_lost, input);
+	setOutput(voltage_drop_abs, data.voltage_drop_abs);
+	setOutput(power_lost, data.power_lost);
 }
 
-function setOutput(value, output, input) {
+function setOutput(value, output) {
 	value = roundInput(value, output);
 	if (value < output.min) {
 		value = output.min;
 	}
-	if (output.max && value > output.max) {
+	else if (output.max && value > output.max) {
 		value = output.max;
 		window[output.id] = value;
-		if (input.id == 'standard_section') {
-			setLength(input);
-		}
-		else if (input.id == 'voltage') {
-			setPower(input);
-		}
-		else {
-			setSection(input);
-		}
 	}
 	if (output.value != value) {
 		output.value = value;
-		if (input.id != 'standard_section' || output.id != 'section') {
-			output.classList.add('highlight');
-			
-		}
+		output.classList.add('highlight');
 	}
 }
 
@@ -334,10 +300,8 @@ function saveSettings(e) {
 	resistivity = settings.resistivity.value;
 	max_current = settings.max_current.value;
 	data.current.max = settings.max_current.value;
-	max_drop_per = settings.max_drop_per.value / 100;
-	data.voltage_drop_per.max = settings.max_drop_per.value;
-	compute(data.voltage);
 	settings.parentNode.removeAttribute('open');
+	compute(data.voltage);
 }
 
 const
@@ -345,14 +309,12 @@ data         = document.getElementById('data'),
 settings     = document.getElementById('settings'),
 sections     = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 4, 6, 10, 16, 25, 35, 50, 50.01],
 compute_list = {
-	voltage:          [setCurrent, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	power:            [setCurrent, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	current:          [setPower, setMaxValues, setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	length:           [setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	standard_section: [setSection, setVoltageDropAbs, setVoltageDropPer, setLostPower],
-	voltage_drop_abs: [setVoltageDropPer, setLostPower, setSection],
-	voltage_drop_per: [setVoltageDropAbs, setLostPower, setSection],
-	power_lost:       [setVoltageDropAbs, setVoltageDropPer, setSection]
+	voltage:          [setCurrent, setSection, setRealDrops],
+	power:            [setCurrent, setSection, setRealDrops],
+	current:          [setPower, setSection, setRealDrops],
+	voltage_drop_per: [setSection, setRealDrops],
+	length:           [setSection, setRealDrops],
+	section:          [setLength, setRealDrops]
 };
 
 data.querySelectorAll('input, select').forEach(function(input) {
