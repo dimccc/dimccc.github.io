@@ -194,7 +194,7 @@ td[colspan="2"] {
 		<table>
 			<tr>
 				<th><label for="resistivity">Résistivité du conducteur</label></th>
-				<td><input id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
+				<td><input id="resistivity" list="cable-data" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
 			</tr>
 			<tr>
 				<th><label for="max_current">Intensité maximale</label></th>
@@ -204,6 +204,12 @@ td[colspan="2"] {
 				<td colspan="2"><button id="save_settings">Sauvegarder</button><button type="reset">Réinitialiser</button></td>
 			</tr>
 		</table>
+		<datalist id="cable-data">
+			<option value="0,018">
+			<option value="0,023">
+			<option value="0,026">
+			<option value="0,037">
+		</datalist>
 	</form>
 </details>
 <script>
