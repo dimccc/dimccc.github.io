@@ -201,7 +201,7 @@ td[colspan="2"] {
 				<td><input id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
 			</tr>
 			<tr>
-				<td colspan="2"><button id="save_settings">Sauvegarder</button><button type="reset">Réinitialiser</button></td>
+				<td colspan="2"><button>Sauvegarder</button><button type="reset">Réinitialiser</button></td>
 			</tr>
 		</table>
 	</form>
@@ -317,7 +317,6 @@ function saveSettings(e) {
 	resistivity = settings.resistivity.value;
 	max_current = settings.max_current.value;
 	data.current.max = settings.max_current.value;
-	settings.parentNode.removeAttribute('open');
 	compute(data.voltage);
 }
 
