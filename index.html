@@ -210,12 +210,15 @@ td[colspan="2"] {
 function setCurrent(input) {
 	current = power / voltage;
 	data.power.max = roundInput(voltage * max_current, data.power);
+	if (current > data.current.max) {
+		current = data.current.max;
+		setPower(input);
+	}
 	setOutput(current, data.current);
 }
 
 function setPower(input){ 
 	power = current * voltage;
-	data.power.max = roundInput(voltage * max_current, data.power);
 	setOutput(power, data.power);
 }
 
@@ -258,10 +261,6 @@ function setOutput(value, output) {
 	value = roundInput(value, output);
 	if (value < output.min) {
 		value = output.min;
-	}
-	else if (output.max && value > output.max) {
-		value = output.max;
-		window[output.id] = value;
 	}
 	if (output.value != value) {
 		output.value = value;
