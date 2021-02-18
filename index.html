@@ -316,7 +316,6 @@ function saveSettings(e) {
 	e.preventDefault();
 	resistivity = settings.resistivity.value;
 	max_current = settings.max_current.value;
-	data.current.max = settings.max_current.value;
 	compute(data.voltage);
 }
 
