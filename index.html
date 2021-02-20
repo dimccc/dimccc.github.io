@@ -16,13 +16,15 @@ body {
 	background:#bbb;
 	font:400 100%/1.2 sans-serif;
 }
-input, select {
+input,
+select {
 	border-radius:3px;
 	background:#f5f5f5;
 	border:1px solid #aaa;
 	box-sizing:content-box;
 }
-input:focus, select:focus {
+input:focus,
+select:focus {
 	outline:none !important;
 	background:#fff !important;
 	border-color:#000 !important;
@@ -41,22 +43,24 @@ table {
 	border:1px solid #999;
 	box-shadow:0 0 8px rgba(0,0,0,.2);
 }
-#data input, #data select {
+#data input,
+#data output, 
+#data select {
 	padding:2px;
 	width:3.5em;
 	height:1.2em;
 	font:400 1.2rem sans-serif;
 }
-#data input {
+#data input,
+#data output {
 	text-indent:.2em;
 }
-#data input:disabled {
-	color:#000;
-	border:none;
-	background:#fff;
-	-moz-appearance:textfield;
+#data output {
+	display:inline-block;
 }
-#data input.highlight, #data select.highlight {
+#data input.highlight,
+#data output.highlight,
+#data select.highlight {
 	background:yellow;
 }
 #data select.exceeded{
@@ -132,8 +136,8 @@ td[colspan="2"] {
 }
 </style>
 </head>
-<body onload="settings.reset()">
-<form id="data" onreset="clearHighlights()" autocomplete="off">
+<body>
+<form id="data" autocomplete="off">
 	<table aria-live="polite">
 		<caption>Dimensionnement des câbles en très basse tension et en courant continu</caption>
 		<tr aria-atomic="true">
@@ -180,17 +184,17 @@ td[colspan="2"] {
 		</tr>
 		<tr aria-atomic="true">
 			<th>Chute de tension réelle</th>
-			<td><input id="voltage_drop_abs" role="presentation" disabled type="number" step=".01" value="0.52"> Volts</td>
+			<td><output id="voltage_drop_abs" data-step=".01">0,52</output> Volts</td>
 		</tr>
 		<tr aria-atomic="true">
 			<th>Puissance perdue</th>
-			<td><input id="power_lost" role="presentation" disabled type="number" step=".1" value="7.8"> Watts</td>
+			<td><output id="power_lost" data-step=".1">7,8</output> Watts</td>
 		</tr>
 	</table>
 </form>
 <details>
 	<summary onclick="scrollToSettings()">Paramètres</summary>
-	<form id="settings" onsubmit="saveSettings(event)" onreset="data.reset()" autocomplete="off">
+	<form id="settings" onsubmit="applySettings(event)" autocomplete="off">
 		<table>
 			<tr>
 				<th><label for="resistivity">Résistivité du conducteur</label></th>
@@ -201,7 +205,7 @@ td[colspan="2"] {
 				<td><input id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
 			</tr>
 			<tr>
-				<td colspan="2"><button>Sauvegarder</button><button type="reset">Réinitialiser</button></td>
+				<td colspan="2"><button>Appliquer</button></td>
 			</tr>
 		</table>
 	</form>
@@ -209,7 +213,7 @@ td[colspan="2"] {
 <script>
 function setCurrent(input) {
 	current = power / voltage;
-	data.power.max = roundInput(voltage * max_current, data.power);
+	data.power.max = roundValue(voltage * max_current, data.power);
 	if (current > data.current.max) {
 		current = data.current.max;
 		setPower(input);
@@ -251,15 +255,15 @@ function setSection(input) {
 }
 
 function setRealDrops(input) {
-	voltage_drop_abs = (length * current * resistivity) / section;
-	power_lost = voltage_drop_abs * current;
+	let voltage_drop_abs = (length * current * resistivity) / section;
+	let power_lost = voltage_drop_abs * current;
 	setOutput(voltage_drop_abs, data.voltage_drop_abs);
 	setOutput(power_lost, data.power_lost);
 }
 
 function setOutput(value, output) {
-	value = roundInput(value, output);
-	if (value < output.min) {
+	value = roundValue(value, output);
+	if (output.min && value < output.min) {
 		value = output.min;
 	}
 	if (output.value != value) {
@@ -268,30 +272,29 @@ function setOutput(value, output) {
 	}
 }
 
-function roundInput(value, input) {
-	if (input.step) {
-		let factor = 1 / parseFloat(input.step);
-		value = Math.round(value * factor) / factor;
+function roundValue(value, input) {
+	let factor = 1 / parseFloat(input.step || input.dataset.step || .01);
+	value = Math.round(value * factor) / factor;
+	if (input.tagName == 'OUTPUT') { 
+		value = value.toLocaleString('fr-FR')
 	}
 	return value;
 }
 
-function clearHighlights() {
-	data.oninput = '';
-	data.querySelectorAll('.highlight').forEach(function(input) {
-		input.classList.remove('highlight');
-	});
-}
-
 function compute(input) {
-	data.oninput = clearHighlights;
+	data.oninput = function() {
+		data.oninput = '';
+		data.querySelectorAll('.highlight').forEach(function(input) {
+			input.classList.remove('highlight');
+		});
+	};
 	if (!input.checkValidity()) {
 		let value = parseFloat(input.value);
 		if (isNaN(value)) {
-			input.value = roundInput(window[input.id], input);
+			input.value = roundValue(window[input.id], input);
 			return
 		}
-		else if (value < input.min) {
+		else if (input.min && value < input.min) {
 			input.value = input.min;
 		}
 		else if (input.max && value > input.max) {
@@ -312,7 +315,7 @@ function scrollToSettings() {
 	}
 }
 
-function saveSettings(e) {
+function applySettings(e) {
 	e.preventDefault();
 	resistivity = settings.resistivity.value;
 	max_current = settings.max_current.value;
