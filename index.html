@@ -221,14 +221,17 @@ function setCurrent(input) {
 	setOutput(current, data.current);
 }
 
-function setPower(input){ 
+function setPower(input){
 	power = current * voltage;
 	setOutput(power, data.power);
 }
 
-function setLength(input) { 
-	length = section * (voltage * voltage_drop_per / 100) / (current * resistivity);
-	setOutput(length, data.length);
+function setLength(input) {
+	let theoretical_length = section * (voltage * voltage_drop_per / 100) / (current * resistivity);
+	if (theoretical_length < length) {
+		length = theoretical_length
+		setOutput(length, data.length);
+	}
 }
 
 function setSection(input) {
@@ -245,7 +248,7 @@ function setSection(input) {
 			setOutput(50.01, data.section);
 		}
 	}
-	else {
+	else if (theoretical_section > section) {
 		for (section of sections) {
 			if (theoretical_section <= section) break;
 		}
