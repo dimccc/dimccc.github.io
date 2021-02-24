@@ -193,7 +193,7 @@ td[colspan="2"] {
 	</table>
 </form>
 <details>
-	<summary onclick="scrollToSettings()">Paramètres</summary>
+	<summary onclick="openSettings()">Paramètres</summary>
 	<form id="settings" onsubmit="applySettings(event)" autocomplete="off">
 		<table>
 			<tr>
@@ -310,7 +310,8 @@ function compute(input) {
 	});
 }
 
-function scrollToSettings() {
+function openSettings() {
+	settings.reset();
 	if (!settings.parentNode.hasAttribute('open')) {
 		setTimeout(function() {
 			settings.scrollIntoView({behavior: 'smooth', block: 'end'});
@@ -322,6 +323,8 @@ function applySettings(e) {
 	e.preventDefault();
 	resistivity = settings.resistivity.value;
 	max_current = settings.max_current.value;
+	settings.resistivity.setAttribute('value', resistivity);
+	settings.max_current.setAttribute('value', max_current);
 	compute(data.voltage);
 }
 
