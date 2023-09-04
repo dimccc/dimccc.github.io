@@ -153,10 +153,6 @@ td[colspan="2"] {
 			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="current" type="number" min=".1" step=".1" max="150" value="15"> Ampères</td>
 		</tr>
 		<tr aria-atomic="true">
-			<th><label for="voltage_drop_per">Chute de tension maximale</label></th>
-			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="voltage_drop_per" type="number" min=".1" step=".1" max="10" value="5"> %</td>
-		</tr>
-		<tr aria-atomic="true">
 			<th><label for="length">Longueur de fil&nbsp;aller&nbsp;retour</label></th>
 			<td><input onchange="compute(this)" oninput="this.reportValidity()" required id="length" type="number" min=".1" step=".1" value="6"> Mètres</td>
 		</tr>
@@ -183,8 +179,8 @@ td[colspan="2"] {
 			</td>
 		</tr>
 		<tr aria-atomic="true">
-			<th>Chute de tension réelle</th>
-			<td><output id="voltage_drop_abs" data-step=".01">0,52</output> Volts</td>
+			<th>Chute de tension</th>
+			<td><output id="voltage_drop" data-step=".1">4,3</output> %</td>
 		</tr>
 		<tr aria-atomic="true">
 			<th>Puissance perdue</th>
@@ -197,12 +193,16 @@ td[colspan="2"] {
 	<form id="settings" onsubmit="applySettings(event)" autocomplete="off">
 		<table>
 			<tr>
-				<th><label for="resistivity">Résistivité du conducteur</label></th>
-				<td><input id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
+				<th><label for="max_voltage_drop">Chute de tension maximale</label></th>
+				<td><input id="max_voltage_drop" type="number" min=".1" step=".1" max="10" value="5"> %</td>
 			</tr>
 			<tr>
 				<th><label for="max_current">Intensité maximale</label></th>
 				<td><input id="max_current" type="number" min="1" step="1" value="150"> Ampères</td>
+			</tr>
+			<tr>
+				<th><label for="resistivity">Résistivité du conducteur</label></th>
+				<td><input id="resistivity" type="number" min=".001" step=".001" max="1" value="0.023"> Ω.mm²/m</td>
 			</tr>
 			<tr>
 				<td colspan="2"><button>Appliquer</button></td>
@@ -227,7 +227,7 @@ function setPower(input){
 }
 
 function setLength(input) {
-	let theoretical_length = section * (voltage * voltage_drop_per / 100) / (current * resistivity);
+	let theoretical_length = section * (voltage * max_voltage_drop / 100) / (current * resistivity);
 	if (theoretical_length < length) {
 		length = theoretical_length
 		setOutput(length, data.length);
@@ -235,7 +235,7 @@ function setLength(input) {
 }
 
 function setSection(input) {
-	let theoretical_section = (length * current * resistivity) / (voltage * voltage_drop_per / 100);
+	let theoretical_section = (length * current * resistivity) / (voltage * max_voltage_drop / 100);
 	if (theoretical_section > 50) {
 		if (input.id != 'length') {
 			section = 50;
@@ -259,8 +259,9 @@ function setSection(input) {
 
 function setRealDrops(input) {
 	let voltage_drop_abs = (length * current * resistivity) / section;
+	let voltage_drop = voltage_drop_abs / voltage * 100;
 	let power_lost = voltage_drop_abs * current;
-	setOutput(voltage_drop_abs, data.voltage_drop_abs);
+	setOutput(voltage_drop, data.voltage_drop);
 	setOutput(power_lost, data.power_lost);
 }
 
@@ -323,8 +324,10 @@ function applySettings(e) {
 	e.preventDefault();
 	resistivity = settings.resistivity.value;
 	max_current = settings.max_current.value;
+	max_voltage_drop = settings.max_voltage_drop.value
 	settings.resistivity.setAttribute('value', resistivity);
 	settings.max_current.setAttribute('value', max_current);
+	settings.max_voltage_drop.setAttribute('value', max_voltage_drop);
 	compute(data.voltage);
 }
 
@@ -336,7 +339,6 @@ compute_list = {
 	voltage:          [setCurrent, setSection, setRealDrops],
 	power:            [setCurrent, setSection, setRealDrops],
 	current:          [setPower, setSection, setRealDrops],
-	voltage_drop_per: [setSection, setRealDrops],
 	length:           [setSection, setRealDrops],
 	section:          [setLength, setRealDrops]
 };
